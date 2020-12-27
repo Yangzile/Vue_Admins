@@ -4,6 +4,8 @@ import router from './router'
 import './plugins/element.js'
 import './assets/css/global.css'
 import axios from 'axios'
+import'./assets/fonts/iconfont.css'
+
 
 Vue.config.productionTip = false
 

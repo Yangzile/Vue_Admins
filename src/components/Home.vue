@@ -12,28 +12,37 @@
     </el-header>
     <!-- 侧边栏 -->
     <el-container>
-      <el-aside width="200px">
+      <el-aside :width="isCollapse ? '64px':'200px'">
+        <div class="toggle-button" @click="togglebtn()">|||</div>
         <!-- 侧边栏长菜单项 -->
         <el-menu
           background-color="#333744"
           text-color="#fff"
-          active-text-color="#ffd04b"
+          active-text-color="#409eff"
+          unique-opened
+          :collapse="isCollapse"
+          :collapse-transition="false"
+          router  
+          :default-active="activePath"
         >
+        <!-- 开启路由跳转模式，index写的地址 -->
           <!-- 一级菜单 -->
-          <el-submenu :index="item.id + ''" v-for="item in menulist" :key="item.id">
+          <el-submenu :index="item.id+''" v-for="item in menulist" :key="item.id">
             <!-- 一级菜单模板 -->
             <template slot="title">
               <!-- 图标 -->
-              <i class="el-icon-location"></i>
+              <i :class="iconslist[item.id]"></i>
               <!-- 文字 -->
               <span>{{item.authName}}</span>
             </template>
             <!-- 二级菜单 -->
-            <el-menu-item :index="itemSon.id" v-for="itemSon in item.children">
+            <el-menu-item :index="'/'+itemSon.path" v-for="itemSon in item.children"
+            @click="savePath(itemSon.path)"
+            >
               <!-- 二级菜单模板 -->
               <template slot="title">
                 <!-- 图标 -->
-                <i class="el-icon-location"></i>
+                <i class="el-icon-menu"></i>
                 <!-- 文字 -->
                 <span>{{itemSon.authName}}</span>
               </template>
@@ -43,7 +52,10 @@
 
         </el-menu>
       </el-aside>
-      <el-main>Main</el-main>
+      <el-main>
+        <!-- 主要内容区域 -->
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -55,6 +67,9 @@
 }
 .el-aside {
   background-color: #333744;
+  .el-menu {
+    border-right: none;
+  }
 }
 .el-main {
   background-color: #eaeaea;
@@ -77,6 +92,18 @@
     margin: 0 10px;
   }
 }
+.iconfont {
+  margin-right: 10px;
+}
+.toggle-button {
+  background-color: #333744;
+  font-size: 10px;
+  line-height: 24px;
+  color: #ffff;
+  text-align: center;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
 </style>
 
 
@@ -85,6 +112,15 @@ export default {
   data() {
     return {
       menulist: [],
+      iconslist: {
+        125: "iconfont icon-users",
+        103: "iconfont icon-tijikongjian",
+        101: "iconfont icon-showpassword",
+        102: "iconfont icon-danju",
+        145: "iconfont icon-baobiao",
+      },
+      isCollapse: false,
+      activePath: '',
     };
   },
   methods: {
@@ -96,13 +132,22 @@ export default {
     // 获取侧边菜单数据
     async getMenuList() {
       const { data: res } = await this.$http.get("menus");
-      console.log("res :>> ", res);
+      // console.log("res :>> ", res);
       if (res.meta.status !== 200) return this.$message.error("错误");
       this.menulist = res.data;
     },
+    togglebtn() {
+      this.isCollapse = !this.isCollapse;
+    },
+    savePath (path) {
+      window.sessionStorage.setItem('activePath','/'+path);
+      this.activePath = '/' + path;
+      // console.log('this.activePath :>> ', this.activePath );
+    }
   },
   created() {
     this.getMenuList();
+    this.activePath = window.sessionStorage.getItem("activePath");
   },
 };
 </script>
